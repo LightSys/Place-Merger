@@ -21,7 +21,7 @@ public class Main {
         }
 
         try {
-            FileReader in = new FileReader("testfiles/TestingUSBGN.csv");
+            FileReader in = new FileReader("testData/TestingUSBGN.csv");
             Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             for (CSVRecord record : records) {
                 String name = record.get("FEATURE_NAME");
@@ -32,7 +32,7 @@ public class Main {
         }
 
         try {
-            FileReader in = new FileReader("testfiles/TestingCountries_populatedplaces_p.txt");
+            FileReader in = new FileReader("testData/TestingCountries_populatedplaces_p.txt");
             Iterable<CSVRecord> records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
             for (CSVRecord record : records) {
                 String name = record.get("FULL_NAME_RO");
@@ -43,12 +43,15 @@ public class Main {
         }
 
         Gson jsonParser = new Gson();
-        String jsonPath = "testData/TestingGeojson.json";
+        String jsonPath = "testData/TestingGeojson.geojson";
         Scanner inStream = null;
         try {
             inStream = new Scanner(new File(jsonPath));
         }
-        catch (FileNotFoundException err) { }
+        catch (FileNotFoundException err) {
+            System.out.println("error processing geojson");
+            System.out.println(err.getMessage());
+        }
 
         String json = inStream.useDelimiter("\\Z").next();
 
