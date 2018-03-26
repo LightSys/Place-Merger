@@ -1,0 +1,6 @@
+config.properties
+out
+testData
+.idea/inspectionProfiles
+.idea/*.xml
+.idea/*.html
