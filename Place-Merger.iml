@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.8.2" level="project" />
     <orderEntry type="library" name="org.postgresql:postgresql:42.2.2.jre7" level="project" />
+    <orderEntry type="library" name="org.apache.commons:commons-csv:1.5" level="project" />
   </component>
 </module>
