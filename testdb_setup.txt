@@ -7,6 +7,6 @@
 	psql -d template1 -c "ALTER USER postgres WITH PASSWORD 'newpassword';"
 4. While you are still logged in as the postgres user (with su - postgres), create the test database
 	createdb placenames-udb
-5. Make sure you can connect to it. Enter /q to quit the Postgres console
+5. Make sure you can connect to it. Enter \q to quit the Postgres console
 	psql placenames-udb
 6. The end. You'll only be able to connect to the database from your postgres Linux user unless you set up other stuff
