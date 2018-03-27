@@ -71,7 +71,7 @@ public class GeojsonToUDb extends SourceToUdb {
         }
 
         all_placesExist.close();
-        all_placesUpdate.close();
+        all_placesUpdateName.close();
         all_placesInsert.close();
         polygonsInsert.close();
     }
