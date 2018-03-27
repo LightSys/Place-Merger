@@ -35,7 +35,12 @@ public class GeojsonToUDb extends SourceToUdb {
     public static void insertIntoUDb(Connection connection, GeoJsonFile geoJsonFile) throws SQLException
     {
         PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
-        PreparedStatement all_placesUpdateName = connection.prepareStatement("UPDATE all_places SET ");
+        PreparedStatement all_placesUpdateName = connection.prepareStatement(
+                "UPDATE all_places SET name = ? WHERE osm_id = ?");
+        PreparedStatement all_placesUpdateFeature_code = connection.prepareStatement(
+                "UPDATE all_places SET feature_code = ? WHERE osm_id = ?");
+        PreparedStatement all_placesUpdatePopulation = connection.prepareStatement(
+                "UPDATE all_places SET population = ? WHERE osm_id = ?");
         PreparedStatement all_placesInsert = connection.prepareStatement(
                 "INSERT INTO all_places (primary_name, osm_id, feature_code, population) VALUES (?, ?, ?, ?)");
         PreparedStatement polygonsInsert = connection.prepareStatement(
@@ -48,7 +53,21 @@ public class GeojsonToUDb extends SourceToUdb {
             all_placesExist.setInt(1,feature.properties.osm_id);
             ResultSet resultSet = all_placesExist.executeQuery();
             if(resultSet.next()) {//if there is already a record with this osm_id
-
+                if(feature.properties.name != null) {
+                    all_placesUpdateName.setString(1,feature.properties.name);
+                    all_placesUpdateName.setInt(2,feature.properties.osm_id);
+                    all_placesUpdateName.executeUpdate();
+                }
+                if(feature.properties.code != 0) {
+                    all_placesUpdateFeature_code.setInt(1,feature.properties.code);
+                    all_placesUpdateFeature_code.setInt(2,feature.properties.osm_id);
+                    all_placesUpdateFeature_code.executeUpdate();
+                }
+                if(feature.properties.population != 0) {
+                    all_placesUpdatePopulation.setInt(1,feature.properties.population);
+                    all_placesUpdatePopulation.setInt(2,feature.properties.osm_id);
+                    all_placesUpdatePopulation.executeUpdate();
+                }
             } else {
                 all_placesInsert.setString(1,feature.properties.name);
                 all_placesInsert.setInt(2,feature.properties.osm_id);
@@ -71,7 +90,9 @@ public class GeojsonToUDb extends SourceToUdb {
         }
 
         all_placesExist.close();
-        all_placesUpdate.close();
+        all_placesUpdateName.close();
+        all_placesUpdateFeature_code.close();
+        all_placesUpdatePopulation.close();
         all_placesInsert.close();
         polygonsInsert.close();
     }
