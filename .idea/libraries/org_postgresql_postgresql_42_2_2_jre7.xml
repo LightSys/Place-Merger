@@ -1,6 +1,5 @@
 <component name="libraryTable">
-  <library name="org.postgresql:postgresql:42.2.2.jre7" type="repository">
-    <properties maven-id="org.postgresql:postgresql:42.2.2.jre7" />
+  <library name="org.postgresql:postgresql:42.2.2.jre7">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/postgresql-42.2.2.jre7.jar!/" />
     </CLASSES>
