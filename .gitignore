@@ -2,6 +2,7 @@ config.properties
 out
 testData
 .idea/inspectionProfiles
+.idea/dataSources
 .idea/*.xml
 .idea/*.html
 lib
