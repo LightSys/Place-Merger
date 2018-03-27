@@ -1,0 +1,14 @@
+1. Install PostgreSQL
+	sudo apt-get install postgresql postgresql-contrib
+2. This installation will add a Linux user called 'postgres'. Change its password
+	sudo passwd postgres
+3. Now change the password for the postgres database user (separate from the postgres Linux user)
+	su - postgres
+	psql -d template1 -c "ALTER USER postgres WITH PASSWORD 'newpassword';"
+4. As the postgres user, run psql and create the placenames_udb database
+    psql
+    CREATE DATABASE placenames_udb ENCODING 'UTF8';
+5. Connect to the new database
+    \connect placenames_udb
+6. Run the sql script to create the tables
+    \i [path to CreateTables.sql]
