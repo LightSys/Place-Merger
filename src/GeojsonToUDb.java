@@ -20,8 +20,6 @@ public class GeojsonToUDb extends SourceToUdb {
         String json = inStream.useDelimiter("\\Z").next();
         GeoJsonFile geoJsonFile = jsonParser.fromJson(json, GeoJsonFile.class);
 
-        System.out.println(geoJsonFile.features.size());
-
         try {
             insertIntoUDb(connection, geoJsonFile);
         }
@@ -36,7 +34,7 @@ public class GeojsonToUDb extends SourceToUdb {
     {
         PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
         PreparedStatement all_placesUpdateName = connection.prepareStatement(
-                "UPDATE all_places SET name = ? WHERE osm_id = ?");
+                "UPDATE all_places SET primary_name = ? WHERE osm_id = ?");
         PreparedStatement all_placesUpdateFeature_code = connection.prepareStatement(
                 "UPDATE all_places SET feature_code = ? WHERE osm_id = ?");
         PreparedStatement all_placesUpdatePopulation = connection.prepareStatement(
@@ -44,7 +42,7 @@ public class GeojsonToUDb extends SourceToUdb {
         PreparedStatement all_placesInsert = connection.prepareStatement(
                 "INSERT INTO all_places (primary_name, osm_id, feature_code, population) VALUES (?, ?, ?, ?)");
         PreparedStatement polygonsInsert = connection.prepareStatement(
-                "INSERT INTO polygons (coordinates, shape_length, shape_area) VALUES (?, ?, ?)");
+                "INSERT INTO polygons (shape_length, shape_area) VALUES (?, ?)");
 
         for(GeoJsonFeature feature: geoJsonFile.features) {
             if (feature.properties.osm_id == 0)
@@ -80,11 +78,11 @@ public class GeojsonToUDb extends SourceToUdb {
             if(! feature.geometry.type.equals("MultiPolygon"))
                 throw new SQLException("One of the polygons was not a MultiPolygon");
 
-            Double[][] coords = convertCollsToArr(feature.geometry.coordinates);
+            //Double[][] coords = convertCollsToArr(feature.geometry.coordinates);
 
-            polygonsInsert.setArray(1,connection.createArrayOf("DOUBLE PRECISION", coords));
-            polygonsInsert.setDouble(2, feature.properties.Shape_Length);
-            polygonsInsert.setDouble(3, feature.properties.Shape_Area);
+            //polygonsInsert.setArray(1,connection.createArrayOf("float8", coords));
+            polygonsInsert.setDouble(1, feature.properties.Shape_Length);
+            polygonsInsert.setDouble(2, feature.properties.Shape_Area);
 
             polygonsInsert.executeUpdate();
         }
