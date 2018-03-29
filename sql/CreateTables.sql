@@ -22,8 +22,8 @@ CREATE TABLE all_places (
 
 CREATE SEQUENCE alt_names_id_seq;
 CREATE TABLE alt_names (
-    id              integer PRIMARY KEY DEFAULT nextval('alt_names_id_seq'),
     place_id        integer REFERENCES all_places (id),
     lang            char(3),
-    name            text
+    name            text,
+    PRIMARY KEY     (place_id, lang, name)
 );
