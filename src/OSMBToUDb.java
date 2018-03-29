@@ -92,8 +92,7 @@ public class OSMBToUDb extends SourceToUdb {
         PreparedStatement getAllPlacesId = connection.prepareStatement(
                 "SELECT id FROM all_places WHERE osm_id = " + osmId);
         PreparedStatement addAltName = connection.prepareStatement(
-                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, '', ?)" +
-                        "ON CONFLICT DO NOTHING");
+                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, '', ?)");
 
         String[] tagsStrings = otherTags.split(",");
         HashMap<String, String> tags = new HashMap<>();
@@ -123,7 +122,11 @@ public class OSMBToUDb extends SourceToUdb {
                 allPlacesId.next();
                 addAltName.setInt(1, allPlacesId.getInt("id"));
                 addAltName.setString(2, tags.get(key));
-                addAltName.executeUpdate();
+                try {
+                    addAltName.executeUpdate();
+                } catch (SQLException e) {
+                    //this is almost certainly due to a primary key conflict, which we'll just ignore so there aren't duplicate entries
+                }
             }
         }
 
