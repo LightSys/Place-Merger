@@ -1,13 +1,37 @@
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
 
 public abstract class SourceToUdb {
+    private HashMap<String, String> countryCodeConversion;
+    public SourceToUdb(){
+        countryCodeConversion = new HashMap<>();
+
+        FileReader in;
+        Iterable<CSVRecord> records;
+        try {
+            in = new FileReader("assets/fips-10-4-to-iso-country-codes.csv");
+            records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+        } catch (IOException err) {
+            System.out.println("SourceToUDb was unable to open an asset csv");
+            System.out.println(err.getMessage());
+            return;
+        }
+
+        for (CSVRecord record: records)
+            countryCodeConversion.put(record.get("ISO 3166"), record.get("FIPS 10-4"));
+
+    }
     public void run(String[] args) {
         if (args.length < 1) {
             System.out.println("No input file specified");
@@ -46,6 +70,9 @@ public abstract class SourceToUdb {
             System.exit(1);
         }
         return connection;
+    }
+    public String ISOtoFIPS(String iso){
+        return countryCodeConversion.get(iso);
     }
     protected abstract void loadIntoUDb(Connection connection, File file);
 }
