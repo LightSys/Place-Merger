@@ -8,11 +8,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 public class OSMBToUDb extends SourceToUdb {
     public static void main(String[] args) {
         new OSMBToUDb().run(args);
     }
+
     protected void loadIntoUDb(Connection connection, File file) {
         FileReader in;
         Iterable<CSVRecord> records;
@@ -32,6 +34,7 @@ public class OSMBToUDb extends SourceToUdb {
             return;
         }
     }
+
     public void insertIntoUDb(Connection connection, Iterable<CSVRecord> records) throws SQLException
     {
         PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
@@ -73,11 +76,60 @@ public class OSMBToUDb extends SourceToUdb {
                 all_placesInsert.executeUpdate();
             }
 
-            //TODO parse other tags
+            handleOtherTags(connection, osm_id, record.get("other_tags"));
         }
 
         all_placesExist.close();
         all_placesUpdate.close();
         all_placesInsert.close();
+    }
+
+    private void handleOtherTags(Connection connection, long osmId, String otherTags) throws SQLException {
+        PreparedStatement updatePop = connection.prepareStatement(
+                "UPDATE all_places SET population = ? WHERE osm_id = " + osmId);
+        PreparedStatement updateCapital = connection.prepareStatement(
+                "UPDATE all_places SET feature_type = 'national_capital' WHERE osm_id = " + osmId);
+        PreparedStatement getAllPlacesId = connection.prepareStatement(
+                "SELECT id FROM all_places WHERE osm_id = " + osmId);
+        PreparedStatement addAltName = connection.prepareStatement(
+                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, '', ?)" +
+                        "ON CONFLICT DO NOTHING");
+
+        String[] tagsStrings = otherTags.split(",");
+        HashMap<String, String> tags = new HashMap<>();
+        //skip parsing the last tag since it's often malformed
+        for (int i = 0; i < tagsStrings.length - 1; i++) {
+            String[] tag = tagsStrings[i].split("=>");
+            if (tag.length == 2) {
+                //remove quotes from around key and value
+                tags.put(tag[0].replace("\"", ""), tag[1].replace("\"", ""));
+            }
+        }
+
+        //update information and add alternate names based on found tags
+        for (String key : tags.keySet()) {
+            if (key.equals("population")) {
+                try {
+                    int population = Integer.parseInt(tags.get(key));
+                    updatePop.setInt(1, population);
+                    updatePop.executeUpdate();
+                } catch (NumberFormatException e) {}
+            }
+            else if (key.contains("capital")) {
+                updateCapital.executeUpdate();
+            }
+            else if (key.contains("name") && !key.startsWith("source:")) {
+                ResultSet allPlacesId = getAllPlacesId.executeQuery();
+                allPlacesId.next();
+                addAltName.setInt(1, allPlacesId.getInt("id"));
+                addAltName.setString(2, tags.get(key));
+                addAltName.executeUpdate();
+            }
+        }
+
+        updatePop.close();
+        updateCapital.close();
+        getAllPlacesId.close();
+        addAltName.close();
     }
 }
