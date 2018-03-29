@@ -4,9 +4,9 @@ public class GeoJsonFeature {
     public String type;
     class Properties{
         public int osm_id;
-        public short code; //feature code
         public int population;
         public String name;
+        public String fclass;
         public double Shape_Length;
         public double Shape_Area;
     }
