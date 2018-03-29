@@ -1,4 +1,3 @@
-import com.google.gson.Gson;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
@@ -9,12 +8,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Scanner;
 
-public class OSMAToUDb extends SourceToUdb {
+public class OSMBToUDb extends SourceToUdb {
     public static void main(String[] args) {
-        new OSMAToUDb().run(args);
+        new OSMBToUDb().run(args);
     }
     protected void loadIntoUDb(Connection connection, File file) {
         FileReader in;
@@ -39,17 +36,17 @@ public class OSMAToUDb extends SourceToUdb {
     {
         PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
         PreparedStatement all_placesUpdate = connection.prepareStatement(
-                "UPDATE all_places SET feature_type = ?, population = ?, primary_name = ?, country = ?, lat = ?, long = ?  WHERE osm_id = ?");
+                "UPDATE all_places SET feature_type = ?, primary_name = ?, country = ? WHERE osm_id = ?");
         PreparedStatement all_placesInsert = connection.prepareStatement(
-                "INSERT INTO all_places (osm_id, feature_type, population, primary_name, country, lat, long) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)");
+                "INSERT INTO all_places (osm_id, feature_type, primary_name, country) " +
+                        "VALUES (?, ?, ?, ?)");
 
         for(CSVRecord record: records) {
             long osm_id = Long.parseLong(record.get("osm_id"));
             if (osm_id == 0)
                 throw new SQLException("There is a feature with no osm_id");
 
-            String fType = record.get("fclass");
+            String fType = record.get("place");
             String[] badTypes = {"island", "region", "neighborhood", "quarter", "municipality", "borough", "locality"};
             boolean reject = false;
             for(String badType: badTypes) {
@@ -64,23 +61,19 @@ public class OSMAToUDb extends SourceToUdb {
             ResultSet resultSet = all_placesExist.executeQuery();
             if(resultSet.next()) {//if there is already a record with this osm_id
                 all_placesUpdate.setString(1, fType);
-                all_placesUpdate.setInt(3, (int) Double.parseDouble(record.get("population"))); //some are in scientific notation
-                all_placesUpdate.setString(3, record.get("name"));
-                all_placesUpdate.setString(4, this.ISOtoFIPS(record.get("ISO")));
-                all_placesUpdate.setDouble(5, Double.parseDouble(record.get("Lat")));
-                all_placesUpdate.setDouble(6, Double.parseDouble(record.get("Lon")));
-                all_placesUpdate.setLong(7, osm_id);
+                all_placesUpdate.setString(2, record.get("name"));
+                all_placesUpdate.setString(3, this.ISOtoFIPS(record.get("ISO")));
+                all_placesUpdate.setLong(4, osm_id);
                 all_placesUpdate.executeUpdate();
             } else {
                 all_placesInsert.setLong(1, osm_id);
                 all_placesInsert.setString(2, fType);
-                all_placesInsert.setInt(3, (int) Double.parseDouble(record.get("population"))); //some are in scientific notation
-                all_placesInsert.setString(4, record.get("name"));
-                all_placesInsert.setString(5, this.ISOtoFIPS(record.get("ISO")));
-                all_placesInsert.setDouble(6, Double.parseDouble(record.get("Lat")));
-                all_placesInsert.setDouble(7, Double.parseDouble(record.get("Lon")));
+                all_placesInsert.setString(3, record.get("name"));
+                all_placesInsert.setString(4, this.ISOtoFIPS(record.get("ISO")));
                 all_placesInsert.executeUpdate();
             }
+
+            //TODO parse other tags
         }
 
         all_placesExist.close();
