@@ -48,6 +48,17 @@ public class GeojsonToUDb extends SourceToUdb {
             if (feature.properties.osm_id == 0)
                 throw new SQLException("There is a feature with no osm_id");
 
+            String fType = feature.properties.fclass;
+            String[] badTypes = {"island", "region", "neighborhood", "quarter", "municipality", "borough", "locality"};
+            boolean reject = false;
+            for(String badType: badTypes) {
+                if(badType.equals(fType)) {
+                    reject = true;
+                    break;
+                }
+            }
+            if (reject) continue;
+
             all_placesExist.setInt(1,feature.properties.osm_id);
             ResultSet resultSet = all_placesExist.executeQuery();
             if(resultSet.next()) {//if there is already a record with this osm_id

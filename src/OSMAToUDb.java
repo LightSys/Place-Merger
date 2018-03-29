@@ -53,7 +53,7 @@ public class OSMAToUDb extends SourceToUdb {
             String[] badTypes = {"island", "region", "neighborhood", "quarter", "municipality", "borough", "locality"};
             boolean reject = false;
             for(String badType: badTypes) {
-                if(badType == fType) {
+                if(badType.equals(fType)) {
                     reject = true;
                     break;
                 }
