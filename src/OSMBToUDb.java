@@ -36,10 +36,10 @@ public class OSMBToUDb extends SourceToUdb {
     {
         PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
         PreparedStatement all_placesUpdate = connection.prepareStatement(
-                "UPDATE all_places SET feature_code = ?, primary_name = ?, lat = ?, long = ?  WHERE osm_id = ?");
+                "UPDATE all_places SET feature_type = ?, primary_name = ?, country = ? WHERE osm_id = ?");
         PreparedStatement all_placesInsert = connection.prepareStatement(
-                "INSERT INTO all_places (osm_id, feature_code, primary_name, lat, long) " +
-                        "VALUES (?, ?, ?, ?, ?)");
+                "INSERT INTO all_places (osm_id, feature_type, primary_name, country) " +
+                        "VALUES (?, ?, ?, ?)");
 
         for(CSVRecord record: records) {
             int osm_id = Integer.parseInt(record.get("osm_id"));
@@ -62,16 +62,14 @@ public class OSMBToUDb extends SourceToUdb {
             if(resultSet.next()) {//if there is already a record with this osm_id
                 all_placesUpdate.setString(1, fType);
                 all_placesUpdate.setString(2, record.get("name"));
-                all_placesUpdate.setDouble(3, Double.parseDouble(record.get("Lat")));
-                all_placesUpdate.setDouble(4, Double.parseDouble(record.get("Lon")));
-                all_placesUpdate.setInt(5, Integer.parseInt(record.get("osm_id")));
+                all_placesUpdate.setString(3, this.ISOtoFIPS(record.get("ISO")));
+                all_placesUpdate.setInt(4, Integer.parseInt(record.get("osm_id")));
                 all_placesUpdate.executeUpdate();
             } else {
                 all_placesInsert.setInt(1, Integer.parseInt(record.get("osm_id")));
                 all_placesInsert.setString(2, fType);
                 all_placesInsert.setString(3, record.get("name"));
-                all_placesInsert.setDouble(4, Double.parseDouble(record.get("Lat")));
-                all_placesInsert.setDouble(5, Double.parseDouble(record.get("Lon")));
+                all_placesInsert.setString(4, this.ISOtoFIPS(record.get("ISO")));
                 all_placesInsert.executeUpdate();
             }
 
