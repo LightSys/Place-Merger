@@ -37,7 +37,7 @@ public class OSMAToUDb extends SourceToUdb {
     }
     public void insertIntoUDb(Connection connection, Iterable<CSVRecord> records) throws SQLException
     {
-        PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
+        PreparedStatement all_placesExist = connection.prepareStatement("SELECT id FROM all_places WHERE osm_id = ?");
         PreparedStatement all_placesUpdate = connection.prepareStatement(
                 "UPDATE all_places SET feature_type = ?, population = ?, primary_name = ?, country = ?, lat = ?, long = ?  WHERE osm_id = ?");
         PreparedStatement all_placesInsert = connection.prepareStatement(

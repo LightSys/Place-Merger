@@ -32,7 +32,7 @@ public class GeojsonToUDb extends SourceToUdb {
     }
     public static void insertIntoUDb(Connection connection, GeoJsonFile geoJsonFile) throws SQLException
     {
-        PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
+        PreparedStatement all_placesExist = connection.prepareStatement("SELECT id FROM all_places WHERE osm_id = ?");
         PreparedStatement all_placesUpdateName = connection.prepareStatement(
                 "UPDATE all_places SET primary_name = ? WHERE osm_id = ?");
         PreparedStatement all_placesUpdateFeature_type = connection.prepareStatement(
