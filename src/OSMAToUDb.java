@@ -17,8 +17,8 @@ public class OSMAToUDb extends SourceToUdb {
         new OSMAToUDb().run(args);
     }
     protected void loadIntoUDb(Connection connection, File file) {
-        FileReader in = null;
-        Iterable<CSVRecord> records = null;
+        FileReader in;
+        Iterable<CSVRecord> records;
         try {
             in = new FileReader(file);
             records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
@@ -28,29 +28,18 @@ public class OSMAToUDb extends SourceToUdb {
             return;
         }
 
-        try{ insertIntoUDb(connection, records);}
+        try{ this.insertIntoUDb(connection, records);}
         catch (SQLException err) {
             System.out.println("Error inserting into UDb");
             System.out.println(err.getMessage());
             return;
         }
     }
-    public static void insertIntoUDb(Connection connection, Iterable<CSVRecord> records) throws SQLException
+    public void insertIntoUDb(Connection connection, Iterable<CSVRecord> records) throws SQLException
     {
         PreparedStatement all_placesExist = connection.prepareStatement("SELECT FROM all_places WHERE osm_id = ?");
         PreparedStatement all_placesUpdate = connection.prepareStatement(
                 "UPDATE all_places SET feature_code = ?, population = ?, primary_name = ?, country = ?, lat = ?, long = ?  WHERE osm_id = ?");
-        PreparedStatement all_placesUpdateFeature_code = connection.prepareStatement(
-                "UPDATE all_places SET feature_code = ? WHERE osm_id = ?");
-        PreparedStatement all_placesUpdatePopulation = connection.prepareStatement(
-                "UPDATE all_places SET population = ? WHERE osm_id = ?");
-        PreparedStatement all_placesUpdateCountry = connection.prepareStatement(
-                "UPDATE all_places SET country = ? WHERE osm_id = ?");
-        PreparedStatement all_placesUpdateLat = connection.prepareStatement(
-                "UPDATE all_places SET lat = ? WHERE osm_id = ?");
-        PreparedStatement all_placesUpdateLong = connection.prepareStatement(
-                "UPDATE all_places SET long = ? WHERE osm_id = ?");
-
         PreparedStatement all_placesInsert = connection.prepareStatement(
                 "INSERT INTO all_places (osm_id, feature_code, population, primary_name, country, lat, long) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -60,23 +49,27 @@ public class OSMAToUDb extends SourceToUdb {
             if (osm_id == 0)
                 throw new SQLException("There is a feature with no osm_id");
 
+            int code = Integer.parseInt(record.get("code"));
+            if (code == 1050 || code == 1020 || code == 1040) //Feature codes that we are not interested in
+                continue;
+
             all_placesExist.setInt(1,osm_id);
             ResultSet resultSet = all_placesExist.executeQuery();
             if(resultSet.next()) {//if there is already a record with this osm_id
-                all_placesUpdate.setInt(1, Integer.parseInt(record.get("code")));
-                all_placesUpdate.setInt(2, Integer.parseInt(record.get("population")));
+                all_placesUpdate.setInt(1, code);
+                all_placesUpdate.setInt(3, (int) Double.parseDouble(record.get("population"))); //some are in scientific notation
                 all_placesUpdate.setString(3, record.get("name"));
-                all_placesUpdate.setString(4, record.get("ISO"));
+                all_placesUpdate.setString(4, this.ISOtoFIPS(record.get("ISO")));
                 all_placesUpdate.setDouble(5, Double.parseDouble(record.get("Lat")));
                 all_placesUpdate.setDouble(6, Double.parseDouble(record.get("Lon")));
                 all_placesUpdate.setInt(7, Integer.parseInt(record.get("osm_id")));
                 all_placesUpdate.executeUpdate();
             } else {
                 all_placesInsert.setInt(1, Integer.parseInt(record.get("osm_id")));
-                all_placesInsert.setInt(2, Integer.parseInt(record.get("code"))); //TODO exclude some codes
-                all_placesInsert.setInt(3, Integer.parseInt(record.get("population"))); //TODO some are in scientific
+                all_placesInsert.setInt(2, code);
+                all_placesInsert.setInt(3, (int) Double.parseDouble(record.get("population"))); //some are in scientific notation
                 all_placesInsert.setString(4, record.get("name"));
-                all_placesInsert.setString(5, record.get("ISO")); //TODO wrong
+                all_placesInsert.setString(5, this.ISOtoFIPS(record.get("ISO")));
                 all_placesInsert.setDouble(6, Double.parseDouble(record.get("Lat")));
                 all_placesInsert.setDouble(7, Double.parseDouble(record.get("Lon")));
                 all_placesInsert.executeUpdate();
@@ -85,8 +78,6 @@ public class OSMAToUDb extends SourceToUdb {
 
         all_placesExist.close();
         all_placesUpdate.close();
-        all_placesUpdateFeature_code.close();
-        all_placesUpdatePopulation.close();
         all_placesInsert.close();
     }
 }
