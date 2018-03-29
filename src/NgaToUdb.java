@@ -38,13 +38,12 @@ public class NgaToUdb extends SourceToUdb {
                 "UPDATE all_places SET primary_name = ?, lang = ? WHERE id = ?");
 
         for (CSVRecord record : records) {
-            System.out.println(record.get("FULL_NAME_RO"));
-            System.out.println("-------------------------------------");
-
             //only include records categorized as populated places
             if (!record.get("FC").equals("P")) {
                 continue;
             }
+
+            String currentRecordName = record.get("FULL_NAME_RO");
 
             //look in the hash map to see if there's an existing entry in the database with this UFI
             int ufi = Integer.parseInt(record.get("UFI"));
@@ -61,16 +60,16 @@ public class NgaToUdb extends SourceToUdb {
                     all_placesSameUFI.setInt(1, existingEntryForUFIId);
                     ResultSet oldPrimaryName = all_placesSameUFI.executeQuery();
                     oldPrimaryName.next();
-                    addAltName(connection, existingEntryForUFIId, oldPrimaryName.getString("lang"), oldPrimaryName.getString("primary_name"));
+                    addAltName(connection, existingEntryForUFIId, currentRecordName, oldPrimaryName.getString("lang"), oldPrimaryName.getString("primary_name"));
 
                     //set the primary name to this new record's name
-                    all_placesUpdateName.setString(1, record.get("FULL_NAME_RO"));
+                    all_placesUpdateName.setString(1, currentRecordName);
                     all_placesUpdateName.setString(2, record.get("LC"));
                     all_placesUpdateName.setInt(3, existingEntryForUFIId);
                     all_placesUpdateName.executeUpdate();
                 } else {
                     //add the current record as an alternate name; leave the current primary name alone
-                    addAltName(connection, existingEntryForUFIId, record.get("LC"), record.get("FULL_NAME_RO"));
+                    addAltName(connection, existingEntryForUFIId, null, record.get("LC"), currentRecordName);
                 }
                 all_placesId = existingEntryForUFIId;
             }
@@ -79,7 +78,7 @@ public class NgaToUdb extends SourceToUdb {
             else {
                 all_placesInsert.setDouble(1, Double.parseDouble(record.get("LAT")));
                 all_placesInsert.setDouble(2, Double.parseDouble(record.get("LONG")));
-                all_placesInsert.setString(3, record.get("FULL_NAME_RO"));
+                all_placesInsert.setString(3, currentRecordName);
                 all_placesInsert.setString(4, record.get("LC"));
                 //if this place is a capital, set the feature code to the corresponding OSM feature code
                 if (record.get("DSG").equals("PPLC")) {
@@ -100,24 +99,29 @@ public class NgaToUdb extends SourceToUdb {
             ufiToId.put(ufi, all_placesId);
 
             //add alternate spellings and orders of this name as alternate names
-            addAltName(connection, all_placesId, record.get("LC"), record.get("FULL_NAME_ND_RO"));
-            addAltName(connection, all_placesId, record.get("LC"), record.get("FULL_NAME_RG"));
-            addAltName(connection, all_placesId, record.get("LC"), record.get("FULL_NAME_ND_RG"));
-            addAltName(connection, all_placesId, record.get("LC"), record.get("SHORT_FORM"));
-
-            System.out.println();
+            addAltName(connection, all_placesId, currentRecordName, record.get("LC"), record.get("FULL_NAME_ND_RO"));
+            addAltName(connection, all_placesId, currentRecordName, record.get("LC"), record.get("FULL_NAME_RG"));
+            addAltName(connection, all_placesId, currentRecordName, record.get("LC"), record.get("FULL_NAME_ND_RG"));
+            addAltName(connection, all_placesId, currentRecordName, record.get("LC"), record.get("SHORT_FORM"));
         }
+
+        all_placesSameUFI.close();
+        all_placesInsert.close();
+        all_placesUpdateName.close();
     }
 
-    private void addAltName(Connection connection, int placeId, String lang, String altName) throws SQLException {
-        if (altName.isEmpty()) {
+    private void addAltName(Connection connection, int placeId, String primaryName, String lang, String altName) throws SQLException {
+        //only insert alternate name if it's not empty and if it's not the same as the primary name
+        if (altName.isEmpty() || altName.equals(primaryName)) {
             return;
         }
         PreparedStatement alt_namesInsert = connection.prepareStatement(
-                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, ?, ?)");
+                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, ?, ?)" +
+                        "ON CONFLICT DO NOTHING");
         alt_namesInsert.setInt(1, placeId);
         alt_namesInsert.setString(2, lang);
         alt_namesInsert.setString(3, altName);
-        System.out.println(alt_namesInsert);
+        alt_namesInsert.executeUpdate();
+        alt_namesInsert.close();
     }
 }
