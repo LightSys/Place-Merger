@@ -116,12 +116,15 @@ public class NgaToUdb extends SourceToUdb {
             return;
         }
         PreparedStatement alt_namesInsert = connection.prepareStatement(
-                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, ?, ?)" +
-                        "ON CONFLICT DO NOTHING");
+                "INSERT INTO alt_names (place_id, lang, name) VALUES (?, ?, ?)");
         alt_namesInsert.setInt(1, placeId);
         alt_namesInsert.setString(2, lang);
         alt_namesInsert.setString(3, altName);
-        alt_namesInsert.executeUpdate();
+        try {
+            alt_namesInsert.executeUpdate();
+        } catch (SQLException e) {
+            //this is almost certainly due to a primary key conflict, which we'll just ignore so there aren't duplicate entries
+        }
         alt_namesInsert.close();
     }
 }
