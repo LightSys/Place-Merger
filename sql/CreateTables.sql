@@ -14,8 +14,8 @@ CREATE TABLE all_places (
     primary_name    text,
     lang            char(3),
     population      integer,
-    feature_code    integer,
-    osm_id          integer,
+    feature_type    text,
+    osm_id          bigint,
     country         char(2),
     polygon         integer REFERENCES polygons (id)
 );

@@ -32,7 +32,7 @@ public class NgaToUdb extends SourceToUdb {
         PreparedStatement all_placesSameUFI = connection.prepareStatement(
                 "SELECT primary_name, lang FROM all_places WHERE id = ?");
         PreparedStatement all_placesInsert = connection.prepareStatement(
-                "INSERT INTO all_places (lat, long, primary_name, lang, feature_code, country) " +
+                "INSERT INTO all_places (lat, long, primary_name, lang, feature_type, country) " +
                         "VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         PreparedStatement all_placesUpdateName = connection.prepareStatement(
                 "UPDATE all_places SET primary_name = ?, lang = ? WHERE id = ?");
@@ -80,11 +80,11 @@ public class NgaToUdb extends SourceToUdb {
                 all_placesInsert.setDouble(2, Double.parseDouble(record.get("LONG")));
                 all_placesInsert.setString(3, currentRecordName);
                 all_placesInsert.setString(4, record.get("LC"));
-                //if this place is a capital, set the feature code to the corresponding OSM feature code
+                //if this place is a capital, set the feature code to the corresponding OSM feature type
                 if (record.get("DSG").equals("PPLC")) {
-                    all_placesInsert.setInt(5, 1005);
+                    all_placesInsert.setString(5, "national_capital");
                 } else {
-                    all_placesInsert.setInt(5, 0);
+                    all_placesInsert.setString(5, null);
                 }
                 all_placesInsert.setString(6, record.get("CC1"));
                 all_placesInsert.executeUpdate();
