@@ -12,3 +12,4 @@
     \connect placenames_udb
 6. Run the sql script to create the tables
     \i [path to CreateTables.sql]
+7. Set up password authentication. As root, open /var/lib/pgsql/data/pg_hba.conf. Set the "METHOD" for the first three entries (local, ipv4 host, and ipv6 host) to "md5" (they will currently be "peer" or "ident")
