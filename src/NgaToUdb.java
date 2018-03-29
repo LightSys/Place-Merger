@@ -15,7 +15,7 @@ public class NgaToUdb extends SourceToUdb {
     protected void loadIntoUDb(Connection connection, File file) {
        try {
            FileReader in = new FileReader(file);
-           Iterable<CSVRecord> records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
+           Iterable<CSVRecord> records = CSVFormat.TDF.withFirstRecordAsHeader().withQuote(null).parse(in);
            insertRecords(connection, records);
        } catch (IOException e) {
            return;
