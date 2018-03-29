@@ -59,27 +59,27 @@ public class GeojsonToUDb extends SourceToUdb {
             }
             if (reject) continue;
 
-            all_placesExist.setInt(1,feature.properties.osm_id);
+            all_placesExist.setLong(1,feature.properties.osm_id);
             ResultSet resultSet = all_placesExist.executeQuery();
             if(resultSet.next()) {//if there is already a record with this osm_id
                 if(feature.properties.name != null) {
                     all_placesUpdateName.setString(1,feature.properties.name);
-                    all_placesUpdateName.setInt(2,feature.properties.osm_id);
+                    all_placesUpdateName.setLong(2,feature.properties.osm_id);
                     all_placesUpdateName.executeUpdate();
                 }
                 if(feature.properties.fclass != null) {
                     all_placesUpdateFeature_type.setString(1,feature.properties.fclass);
-                    all_placesUpdateFeature_type.setInt(2,feature.properties.osm_id);
+                    all_placesUpdateFeature_type.setLong(2,feature.properties.osm_id);
                     all_placesUpdateFeature_type.executeUpdate();
                 }
                 if(feature.properties.population != 0) {
                     all_placesUpdatePopulation.setInt(1,feature.properties.population);
-                    all_placesUpdatePopulation.setInt(2,feature.properties.osm_id);
+                    all_placesUpdatePopulation.setLong(2,feature.properties.osm_id);
                     all_placesUpdatePopulation.executeUpdate();
                 }
             } else {
                 all_placesInsert.setString(1,feature.properties.name);
-                all_placesInsert.setInt(2,feature.properties.osm_id);
+                all_placesInsert.setLong(2,feature.properties.osm_id);
                 all_placesInsert.setString(3,feature.properties.fclass);
                 all_placesInsert.setInt(4,feature.properties.population);
                 all_placesInsert.executeUpdate();

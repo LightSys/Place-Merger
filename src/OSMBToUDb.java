@@ -42,7 +42,7 @@ public class OSMBToUDb extends SourceToUdb {
                         "VALUES (?, ?, ?, ?)");
 
         for(CSVRecord record: records) {
-            int osm_id = Integer.parseInt(record.get("osm_id"));
+            long osm_id = Long.parseLong(record.get("osm_id"));
             if (osm_id == 0)
                 throw new SQLException("There is a feature with no osm_id");
 
@@ -57,16 +57,16 @@ public class OSMBToUDb extends SourceToUdb {
             }
             if (reject) continue;
 
-            all_placesExist.setInt(1,osm_id);
+            all_placesExist.setLong(1,osm_id);
             ResultSet resultSet = all_placesExist.executeQuery();
             if(resultSet.next()) {//if there is already a record with this osm_id
                 all_placesUpdate.setString(1, fType);
                 all_placesUpdate.setString(2, record.get("name"));
                 all_placesUpdate.setString(3, this.ISOtoFIPS(record.get("ISO")));
-                all_placesUpdate.setInt(4, Integer.parseInt(record.get("osm_id")));
+                all_placesUpdate.setLong(4, osm_id);
                 all_placesUpdate.executeUpdate();
             } else {
-                all_placesInsert.setInt(1, Integer.parseInt(record.get("osm_id")));
+                all_placesInsert.setLong(1, osm_id);
                 all_placesInsert.setString(2, fType);
                 all_placesInsert.setString(3, record.get("name"));
                 all_placesInsert.setString(4, this.ISOtoFIPS(record.get("ISO")));

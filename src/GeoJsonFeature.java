@@ -3,7 +3,7 @@ import java.util.Collection;
 public class GeoJsonFeature {
     public String type;
     class Properties{
-        public int osm_id;
+        public long osm_id;
         public int population;
         public String name;
         public String fclass;
