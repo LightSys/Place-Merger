@@ -19,6 +19,7 @@ CREATE TABLE all_places (
     country         char(2),
     polygon         integer REFERENCES polygons (id)
 );
+CREATE UNIQUE INDEX ON all_places (osm_id);
 
 CREATE SEQUENCE alt_names_id_seq;
 CREATE TABLE alt_names (
