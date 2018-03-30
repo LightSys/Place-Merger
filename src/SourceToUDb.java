@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
 
-public abstract class SourceToUdb {
+public abstract class SourceToUDb {
     private HashMap<String, String> countryCodeConversion;
-    public SourceToUdb(){
+    public SourceToUDb(){
         countryCodeConversion = new HashMap<>();
 
         FileReader in;

@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-public class OSMBToUDb extends SourceToUdb {
+public class OSMBToUDb extends SourceToUDb {
     public static void main(String[] args) {
         new OSMBToUDb().run(args);
     }

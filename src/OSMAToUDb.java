@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Scanner;
 
-public class OSMAToUDb extends SourceToUdb {
+public class OSMAToUDb extends SourceToUDb {
     public static void main(String[] args) {
         new OSMAToUDb().run(args);
     }

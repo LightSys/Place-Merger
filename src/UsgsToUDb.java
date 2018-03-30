@@ -7,9 +7,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class UsgsToUdb extends SourceToUdb {
+public class UsgsToUDb extends SourceToUDb {
     public static void main(String[] args) {
-        new UsgsToUdb().run(args);
+        new UsgsToUDb().run(args);
     }
 
     protected void loadIntoUDb(Connection connection, File file) {

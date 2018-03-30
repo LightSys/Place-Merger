@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
 
-public class NgaToUdb extends SourceToUdb {
+public class NgaToUDb extends SourceToUDb {
     public static void main(String[] args) {
-        new NgaToUdb().run(args);
+        new NgaToUDb().run(args);
     }
 
     protected void loadIntoUDb(Connection connection, File file) {

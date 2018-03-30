@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.Collection;
 import java.util.Scanner;
 
-public class GeojsonToUDb extends SourceToUdb {
+public class GeojsonToUDb extends SourceToUDb {
     public static void main(String[] args) {
         new GeojsonToUDb().run(args);
     }
