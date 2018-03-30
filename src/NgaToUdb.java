@@ -86,7 +86,7 @@ public class NgaToUdb extends SourceToUdb {
                 } else {
                     all_placesInsert.setString(5, null);
                 }
-                all_placesInsert.setString(6, record.get("CC1").substring(0, 3));
+                all_placesInsert.setString(6, record.get("CC1").substring(0, 2));
                 all_placesInsert.executeUpdate();
 
                 //get the ID of the newly inserted place, and add it to ufiToId
