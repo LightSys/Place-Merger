@@ -17,7 +17,7 @@ public class GeojsonToUDb extends SourceToUdb {
             return;
         }
 
-        String json = inStream.useDelimiter("\\Z").next();
+        String json = inStream.useDelimiter("\\Z").next(); //Fills up the heap space on large files.
         GeoJsonFile geoJsonFile = jsonParser.fromJson(json, GeoJsonFile.class);
 
         try {
